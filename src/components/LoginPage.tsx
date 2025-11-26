@@ -59,7 +59,7 @@ const LoginPage = () => {
       const options = await requestChallenge()
       const authenticationResponse = await startAuthentication({ optionsJSON: options })
       await verifyResponse(authenticationResponse)
-      router.push('/admin')
+      router.push('/dashboard')
     } catch (err) {
       const loginError = err instanceof Error ? err : new Error('Đăng nhập thất bại')
       setError(loginError.message)
