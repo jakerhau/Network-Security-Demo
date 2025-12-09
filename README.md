@@ -1,12 +1,12 @@
-# Network Security Demo - WebAuthn Authentication
+# WebAuthn Authentication
 
 A modern web application demonstrating passwordless authentication using WebAuthn/Passkey technology built with Next.js.
 
 ## Features
 
-- 🔐 **Passwordless Authentication** - Login with WebAuthn/Passkey
-- 📱 **FaceID/TouchID Support** - Biometric authentication
-- 🛡️ **Security Features**: CSRF Protection, Rate Limiting, Account Lockout, Session Rotation, Security Headers
+- **Passwordless Authentication** - Login with WebAuthn/Passkey
+- **FaceID/TouchID Support** - Biometric authentication
+- **Security Features**: CSRF Protection, Rate Limiting, Account Lockout, Session Rotation, Security Headers
 
 ## Tech Stack
 
@@ -47,16 +47,7 @@ UPSTASH_REDIS_REST_TOKEN=your_upstash_redis_token
 ```bash
 npm run dev
 ```
-
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## Project Structure
 
-- `/src/app` - Next.js app router pages
-- `/lib` - Utility functions and configurations
-- `/src/components` - React components
-- `/src/models` - MongoDB models
 
-## License
-
-MIT
