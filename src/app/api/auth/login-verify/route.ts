@@ -4,6 +4,7 @@ import {
 	authenticatedUserIdToCookieStorage,
 	consumeChallengeFromCookieStorage,
 } from '@lib/cookieActions';
+import { getRpID, getOrigin } from '@lib/webauthn-helpers';
 
 export async function POST(request: NextRequest) {
 	try {
@@ -17,12 +18,17 @@ export async function POST(request: NextRequest) {
 			return NextResponse.json({ error: 'Thiếu thông tin đăng nhập' }, { status: 400 });
 		}
 
+		const hostname = request.headers.get('host') || 'localhost';
+		const originHeader = request.headers.get('origin') || undefined;
+		const rpID = getRpID(hostname, originHeader);
+		const expectedOrigin = getOrigin(originHeader, hostname);
+
 		const challenge = await consumeChallengeFromCookieStorage();
 		if (!challenge) {
 			return NextResponse.json({ error: 'Challenge không tồn tại hoặc đã hết hạn' }, { status: 400 });
 		}
 
-		const user = await loginUser(challenge, email.toLowerCase().trim(), credential as any);
+		const user = await loginUser(challenge, email.toLowerCase().trim(), credential as any, rpID, expectedOrigin);
 		await authenticatedUserIdToCookieStorage(user);
 
 		return NextResponse.json({ success: true });

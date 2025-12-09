@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthenticationOptionsJSON } from '@lib/login';
+import { getRpID } from '@lib/webauthn-helpers';
 
 export async function POST(request: NextRequest) {
 	try {
@@ -10,7 +11,11 @@ export async function POST(request: NextRequest) {
 			return NextResponse.json({ error: 'Email là bắt buộc' }, { status: 400 });
 		}
 
-		const options = await getAuthenticationOptionsJSON(email.toLowerCase().trim());
+		const hostname = request.headers.get('host') || 'localhost';
+		const originHeader = request.headers.get('origin') || undefined;
+		const rpID = getRpID(hostname, originHeader);
+
+		const options = await getAuthenticationOptionsJSON(email.toLowerCase().trim(), rpID);
 
 		return NextResponse.json({ success: true, options });
 	} catch (error) {

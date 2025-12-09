@@ -6,6 +6,11 @@
   export async function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
+    // Cho phép API routes đi qua mà không cần authentication
+    if (pathname.startsWith('/api')) {
+      return NextResponse.next();
+    }
+
     // Nếu là trang công khai (sign-in, sign-up, faceid), không redirect — tránh vòng lặp
     if (PUBLIC_PATHS.some((p) => pathname.startsWith(p))) {
       return NextResponse.next();

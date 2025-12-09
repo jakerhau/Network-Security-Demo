@@ -14,15 +14,17 @@ import { generateChallenge } from '@lib/auth'
 import { connectToMongoDB } from '@lib/db'
 import User from '@/models/user'
 import { setChallengeToCookieStorage } from '@lib/cookieActions'
+import { getRpID, getOrigin } from '@lib/webauthn-helpers'
 
-const rpID = process.env.WEBAUTHN_RP_ID ?? 'localhost'
 const rpName = process.env.WEBAUTHN_RP_NAME ?? 'MyApp WebAuthn'
-const expectedOrigin = process.env.WEBAUTHN_ORIGIN ?? `http://${rpID}:3000`
 
 export const getRegistrationOptions = async (
   email: string,
   username: string,
+  rpID?: string,
+  expectedOrigin?: string,
 ): Promise<PublicKeyCredentialCreationOptionsJSON> => {
+  const finalRpID = rpID || process.env.WEBAUTHN_RP_ID || 'localhost'
   await connectToMongoDB()
   let user = await User.findOne({ email })
   if (!user) {
@@ -50,7 +52,7 @@ export const getRegistrationOptions = async (
   const registrationOptionsParameters = {
     challenge,
     rpName,
-    rpID,
+    rpID: finalRpID,
     userID: userIdBuffer,
     userName: email,
     userDisplayName: user.name || username || email,
@@ -68,6 +70,8 @@ export const getRegistrationOptions = async (
 export const verifyRegistration = async (
   credential: RegistrationResponseJSON,
   challenge: string,
+  rpID: string,
+  expectedOrigin: string,
 ): Promise<VerifiedRegistrationResponse> => {
   if (!credential) {
     throw new Error('Invalid Credentials')

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getRegistrationOptions } from '@lib/register';
+import { getRpID, getOrigin } from '@lib/webauthn-helpers';
 
 export async function POST(request: NextRequest) {
 	try {
@@ -10,11 +11,20 @@ export async function POST(request: NextRequest) {
 			return NextResponse.json({ error: 'Email là bắt buộc' }, { status: 400 });
 		}
 
-		const options = await getRegistrationOptions(email.toLowerCase().trim(), username ?? '');
+		const hostname = request.headers.get('host') || 'localhost';
+		const originHeader = request.headers.get('origin') || undefined;
+		const rpID = getRpID(hostname, originHeader);
+		const expectedOrigin = getOrigin(originHeader, hostname);
+
+		const options = await getRegistrationOptions(email.toLowerCase().trim(), username ?? '', rpID, expectedOrigin);
 
 		return NextResponse.json({ success: true, options });
 	} catch (error) {
+		console.error('Error in register-challenge:', error);
 		const message = error instanceof Error ? error.message : 'Unknown error';
-		return NextResponse.json({ error: message }, { status: 500 });
+		return NextResponse.json(
+			{ error: message, details: error instanceof Error ? error.stack : undefined },
+			{ status: 500 }
+		);
 	}
 }
