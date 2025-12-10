@@ -1,7 +1,8 @@
 const textDecoder = new TextDecoder()
 const textEncoder = new TextEncoder()
 
-import { getJwtSecret } from '@lib/jwtConfig'
+import { cookies } from 'next/headers'
+import { getJwtSecret, JWT_COOKIE_NAME } from '@lib/jwtConfig'
 
 const getSecretKey = (() => {
   let keyPromise: Promise<CryptoKey> | null = null
@@ -98,4 +99,41 @@ export const verifyJwtToken = async (token: string): Promise<JwtPayload | null> 
   }
 }
 
+/**
+ * Get the current authenticated user's ID from JWT cookie
+ * Use this in server components and server actions
+ */
+export const getCurrentUserId = async (): Promise<string | null> => {
+  try {
+    const cookieStore = await cookies()
+    const tokenCookie = cookieStore.get(JWT_COOKIE_NAME)?.value
+    
+    if (!tokenCookie) {
+      return null
+    }
+    
+    const payload = await verifyJwtToken(tokenCookie)
+    return payload?.userId ?? payload?.sub ?? null
+  } catch {
+    return null
+  }
+}
 
+/**
+ * Get the current authenticated user's JWT payload
+ * Use this in server components and server actions
+ */
+export const getCurrentUserPayload = async (): Promise<JwtPayload | null> => {
+  try {
+    const cookieStore = await cookies()
+    const tokenCookie = cookieStore.get(JWT_COOKIE_NAME)?.value
+    
+    if (!tokenCookie) {
+      return null
+    }
+    
+    return await verifyJwtToken(tokenCookie)
+  } catch {
+    return null
+  }
+}
