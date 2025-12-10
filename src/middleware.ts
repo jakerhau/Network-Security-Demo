@@ -23,28 +23,12 @@
       return response;
     }
 
-    // Verify JWT token thực sự
+    // Verify JWT token
     const tokenCookie = request.cookies.get(JWT_COOKIE_NAME)?.value;
     if (tokenCookie) {
       const payload = await verifyJwtToken(tokenCookie);
       if (payload && payload.userId) {
         return response; // Valid JWT token
-      }
-    }
-
-    // Verify iron-session cookie
-    const sessionCookieName = process.env.SESSION_COOKIE_NAME ?? 'myapp-webauthn';
-    const sessionCookie = request.cookies.get(sessionCookieName)?.value;
-    if (sessionCookie) {
-      // Iron-session cookies are encrypted, if they exist and are valid format, allow
-      // Full verification happens in server components/actions
-      try {
-        // Basic check: iron-session cookies have specific format
-        if (sessionCookie.length > 20) {
-          return response;
-        }
-      } catch {
-        // Invalid cookie format
       }
     }
 

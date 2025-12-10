@@ -1,8 +1,10 @@
 'use server'
 
+import { cookies } from 'next/headers'
 import getServerActionSession from '@lib/session'
 import { storeChallenge, consumeChallenge } from '@lib/challenge-store'
 import { clearCsrfToken } from '@lib/csrf'
+import { JWT_COOKIE_NAME } from '@lib/jwtConfig'
 
 type UserIdentifier = {
   id?: string | number;
@@ -84,8 +86,15 @@ export const consumeChallengeFromCookieStorage = async (): Promise<string | null
 }
 
 export const clearCookies = async () => {
+  // Clear iron-session (for challenge)
   const session = await getServerActionSession()
   await session.destroy()
+  
+  // Clear JWT cookie
+  const cookieStore = await cookies()
+  cookieStore.delete(JWT_COOKIE_NAME)
+  
+  // Clear CSRF token
   await clearCsrfToken()
 }
 
